@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="wampy.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    tickets available: <span class="available"></span>
+    <br>
+    <button class="buy">Buy one</button>
+</div>
+
+<script>
+
+  const ws = new Wampy('ws://127.0.0.1:11011/ws', {
+    realm: 'realm1',
+
+    onConnect: () => {
+      console.log('connected');
+      ws.call('ticket.get.count', [], {
+        onSuccess: args => document.querySelector('.available').innerHTML = args[0],
+        onError: err => console.error(err)
+      });
+
+      ws.subscribe('ticket.count.changed', args => {
+        document.querySelector('.available').innerHTML = args[0];
+      });
+
+      document.querySelector('.buy').addEventListener('click', () => {
+        ws.call("ticket.buy.one", [], {
+          onSuccess: args => alert("You just bought ticket with id " + args[0]),
+          onError: (err) => console.error(err)
+        });
+      });
+    }
+  });
+
+
+</script>
+
+</body>
+</html>
